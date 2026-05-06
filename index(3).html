@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rathmines BC Trial Assessment</title>
+  <link rel="icon" type="image/png" href="logo.png">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: #ffffff;
+      color: #000000;
+      margin: 0;
+      padding: 0;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+    .ta-header {
+      background: #000000;
+      color: #ffffff;
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      border-bottom: 2px solid #000000;
+    }
+    .ta-header img {
+      height: 48px;
+      width: auto;
+      display: block;
+    }
+    .ta-header-text { flex: 1; }
+    .ta-header-text .club { font-size: 12px; letter-spacing: 1px; text-transform: uppercase; opacity: 0.7; margin: 0; }
+    .ta-header-text .title { font-size: 18px; font-weight: 600; margin: 2px 0 0; }
+    .ta-status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      opacity: 0.8;
+    }
+    .ta-status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #999999;
+    }
+    .ta-status-dot.connected { background: #ffffff; }
+    .ta-status-dot.error { background: #ff6666; }
+    .ta-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 24px 20px;
+    }
+    .ta-h1 { font-size: 24px; font-weight: 600; margin: 0 0 4px; color: #000000; }
+    .ta-sub { font-size: 14px; color: #555555; margin: 0 0 24px; }
+    .ta-section { margin-bottom: 24px; }
+    .ta-label { font-size: 13px; color: #555555; display: block; margin-bottom: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .ta-card { background: #ffffff; border: 1px solid #000000; border-radius: 4px; padding: 16px 20px; margin-bottom: 12px; }
+    .ta-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid #e0e0e0; }
+    .ta-row:last-child { border-bottom: none; }
+    .ta-row-label { font-size: 14px; flex: 1; font-weight: 500; }
+    .ta-row-hint { font-size: 12px; color: #888888; display: block; margin-top: 2px; font-weight: 400; }
+    .ta-scale { display: flex; gap: 4px; }
+    .ta-scale button {
+      width: 36px; height: 36px; padding: 0; font-size: 14px;
+      border: 1px solid #000000; background: #ffffff; color: #000000;
+      border-radius: 4px; cursor: pointer; font-weight: 500;
+      transition: all 0.1s;
+    }
+    .ta-scale button:hover { background: #f0f0f0; }
+    .ta-scale button.selected { background: #000000; color: #ffffff; }
+    .ta-cat-header { font-size: 13px; font-weight: 600; margin: 20px 0 8px; color: #000000; text-transform: uppercase; letter-spacing: 0.5px; }
+    .ta-btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 20px; }
+    .ta-btn-primary {
+      background: #000000; color: #ffffff; border: 1px solid #000000;
+      padding: 12px 24px; border-radius: 4px; cursor: pointer;
+      font-size: 14px; font-weight: 600;
+      transition: all 0.1s;
+    }
+    .ta-btn-primary:hover { background: #333333; }
+    .ta-btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+    .ta-btn-secondary {
+      background: #ffffff; color: #000000; border: 1px solid #000000;
+      padding: 12px 24px; border-radius: 4px; cursor: pointer;
+      font-size: 14px; font-weight: 600;
+    }
+    .ta-btn-secondary:hover { background: #f0f0f0; }
+    .ta-trialist-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 16px; }
+    .ta-trialist-btn {
+      padding: 16px 14px; border: 1px solid #000000; border-radius: 4px;
+      background: #ffffff; color: #000000; cursor: pointer; text-align: left;
+      transition: all 0.1s; font-family: inherit;
+    }
+    .ta-trialist-btn:hover { background: #f0f0f0; }
+    .ta-trialist-btn.done { background: #000000; color: #ffffff; }
+    .ta-trialist-btn.done:hover { background: #333333; }
+    .ta-trialist-btn .name { font-size: 15px; font-weight: 600; }
+    .ta-trialist-btn .src { font-size: 12px; opacity: 0.7; margin-top: 2px; }
+    .ta-trialist-btn .status { font-size: 11px; margin-top: 4px; font-weight: 600; }
+    .ta-textarea {
+      width: 100%; min-height: 80px; padding: 12px; border: 1px solid #000000;
+      border-radius: 4px; font-family: inherit; font-size: 14px; resize: vertical;
+      background: #ffffff; color: #000000;
+    }
+    .ta-textarea:focus { outline: 2px solid #000000; outline-offset: -1px; }
+    .ta-summary-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
+    .ta-summary-table th { text-align: left; padding: 10px 8px; border-bottom: 2px solid #000000; font-weight: 600; font-size: 11px; color: #000000; text-transform: uppercase; letter-spacing: 0.5px; }
+    .ta-summary-table td { padding: 10px 8px; border-bottom: 1px solid #e0e0e0; }
+    .ta-summary-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+    .ta-summary-table tr:hover { background: #f8f8f8; }
+    .ta-pill { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+    .ta-pill-info { background: #000000; color: #ffffff; }
+    .ta-pill-secondary { background: #f0f0f0; color: #000000; border: 1px solid #cccccc; }
+    .ta-back { font-size: 13px; color: #555555; cursor: pointer; background: none; border: none; padding: 0; margin-bottom: 16px; font-family: inherit; text-decoration: underline; }
+    .ta-back:hover { color: #000000; }
+    .ta-empty { text-align: center; padding: 40px 20px; color: #555555; font-size: 14px; }
+    .ta-comments-block { margin-top: 8px; padding: 10px 12px; background: #f8f8f8; border-left: 3px solid #000000; border-radius: 0 4px 4px 0; font-size: 13px; }
+    .ta-comments-block .who { font-weight: 600; font-size: 12px; color: #555555; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .ta-status-bar { background: #f0f0f0; padding: 12px 16px; border-radius: 4px; margin-bottom: 16px; font-size: 13px; border-left: 3px solid #000000; }
+    .ta-pos-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+    .ta-pos-btn {
+      padding: 14px 6px; border: 1px solid #000000; border-radius: 4px;
+      background: #ffffff; color: #000000; cursor: pointer; text-align: center; font-size: 13px;
+      font-family: inherit; transition: all 0.1s;
+    }
+    .ta-pos-btn:hover { background: #f0f0f0; }
+    .ta-pos-btn.selected { background: #000000; color: #ffffff; }
+    .ta-pos-btn .pos-code { font-size: 18px; font-weight: 600; display: block; }
+    .ta-pos-btn .pos-name { font-size: 11px; opacity: 0.7; display: block; margin-top: 2px; }
+    .ta-pos-tag { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; background: #000000; color: #ffffff; margin-right: 4px; }
+    .ta-loading { text-align: center; padding: 40px; color: #555555; }
+    .ta-error { background: #fff0f0; border-left: 3px solid #cc0000; padding: 12px 16px; margin-bottom: 16px; font-size: 13px; color: #cc0000; }
+    .ta-saving { font-size: 11px; color: #888888; font-style: italic; margin-left: 8px; }
+    @media (max-width: 600px) {
+      .ta-pos-grid { grid-template-columns: repeat(5, 1fr); gap: 4px; }
+      .ta-pos-btn { padding: 10px 2px; }
+      .ta-pos-btn .pos-name { display: none; }
+      .ta-scale button { width: 32px; height: 32px; font-size: 13px; }
+      .ta-container { padding: 16px 12px; }
+      .ta-summary-table { font-size: 12px; }
+      .ta-summary-table th, .ta-summary-table td { padding: 6px 4px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="ta-header">
+    <img src="logo.png" alt="Rathmines BC logo">
+    <div class="ta-header-text">
+      <p class="club">Rathmines Basketball Club</p>
+      <p class="title">Trial Assessment</p>
+    </div>
+    <div class="ta-status-indicator">
+      <span class="ta-status-dot" id="taStatusDot"></span>
+      <span id="taStatusText">Connecting</span>
+    </div>
+  </div>
+
+  <div class="ta-container">
+    <div id="taContent">
+      <div class="ta-loading">Loading...</div>
+    </div>
+  </div>
+
+  <script>
+    // ============================================================
+    // CONFIGURATION - REPLACE THESE TWO VALUES BEFORE DEPLOYING
+    // ============================================================
+    const JSONBIN_BIN_ID = 'YOUR_BIN_ID_HERE';
+    const JSONBIN_ACCESS_KEY = 'YOUR_ACCESS_KEY_HERE';
+    // ============================================================
+
+    const JSONBIN_BASE = 'https://api.jsonbin.io/v3/b/' + JSONBIN_BIN_ID;
+
+    const TRIALISTS = [
+      { id: 'jack', name: 'Jack', source: "John's nomination" },
+      { id: 'mo', name: 'Mo', source: 'recommended by Sasha' },
+      { id: 'mo_brother', name: "Mo's brother", source: 'with Mo' },
+      { id: 'sean', name: 'Sean', source: 'Thursday scrims' },
+      { id: 'fergal', name: 'Fergal', source: "Thursday scrims, Sean's brother" },
+      { id: 'luke', name: 'Luke', source: 'put forward by Adam Halpin' }
+    ];
+
+    const ASSESSORS_FULL = [
+      { id: 'iddo', name: 'Iddo' },
+      { id: 'brean', name: 'Brean' },
+      { id: 'omar', name: 'Omar' }
+    ];
+    const ASSESSORS_LIGHT = [
+      { id: 'phil', name: 'Phil' },
+      { id: 'josh', name: 'Josh' },
+      { id: 'dan', name: 'Dan' }
+    ];
+    const ALL_ASSESSORS = [...ASSESSORS_FULL, ...ASSESSORS_LIGHT];
+
+    const POSITIONS = [
+      { id: 'PG', code: '1', name: 'Point guard' },
+      { id: 'SG', code: '2', name: 'Shooting guard' },
+      { id: 'SF', code: '3', name: 'Small forward' },
+      { id: 'PF', code: '4', name: 'Power forward' },
+      { id: 'C',  code: '5', name: 'Center' }
+    ];
+
+    const FULL_CATEGORIES = [
+      { id: 'offense', name: 'Offensive skill', criteria: [
+        { id: 'finishing', name: 'Finishing at the rim', hint: 'layups, contact finishes' },
+        { id: 'midrange', name: 'Mid-range shooting', hint: 'pull-ups, catch and shoot' },
+        { id: 'passing', name: 'Passing', hint: 'reads, accuracy, vision' }
+      ]},
+      { id: 'defense', name: 'Defense and rebounding', criteria: [
+        { id: 'one_v_one', name: '1v1 defense', hint: 'stance, contain, contest' },
+        { id: 'def_reb', name: 'Defensive rebounding', hint: 'box out, anticipation' }
+      ]},
+      { id: 'iq', name: 'Basketball IQ (high importance)', criteria: [
+        { id: 'zone_iq', name: 'Reads zone defense', hint: 'gaps, short corner, skips' },
+        { id: 'spacing', name: 'Spacing', hint: 'positioning off ball' },
+        { id: 'decisions', name: 'Decision making', hint: 'pace, shot selection' }
+      ]},
+      { id: 'physical', name: 'Physical and intangibles', criteria: [
+        { id: 'fitness', name: 'Conditioning and fitness', hint: 'sustained over session' },
+        { id: 'communication', name: 'Communication on court', hint: 'calls, talks defense' }
+      ]},
+      { id: 'fit', name: 'Coachability and fit (high importance)', criteria: [
+        { id: 'coachable', name: 'Coachability', hint: 'responds to feedback' },
+        { id: 'attitude', name: 'Attitude and body language', hint: 'on bench and on court' },
+        { id: 'social', name: 'Interaction with players', hint: 'in breaks, water breaks' },
+        { id: 'reliability', name: 'Reliability signals', hint: 'on time, kit, engaged' }
+      ]}
+    ];
+
+    const LIGHT_CATEGORIES = [
+      { id: 'gut', name: 'Basketball gut feel', criteria: [
+        { id: 'gut_feel', name: 'Overall basketball impression', hint: 'gut score from what you saw' }
+      ]},
+      { id: 'fit', name: 'Cultural and social fit', criteria: [
+        { id: 'attitude', name: 'Attitude and body language', hint: 'on bench and on court' },
+        { id: 'social', name: 'Interaction with players', hint: 'in breaks, water breaks' },
+        { id: 'reliability', name: 'Reliability signals', hint: 'on time, kit, engaged' }
+      ]}
+    ];
+
+    const FULL_WEIGHTS = { offense: 1.0, defense: 1.0, iq: 1.5, physical: 1.0, fit: 1.5 };
+
+    // ============================================================
+    // STATE
+    // ============================================================
+    let state = { view: 'home', assessor: null, trialist: null };
+    let cache = { assessments: {} }; // local mirror of bin data
+    let saveQueue = Promise.resolve(); // serialize saves to avoid race conditions
+    let isOnline = false;
+
+    function setStatus(state, text) {
+      const dot = document.getElementById('taStatusDot');
+      const txt = document.getElementById('taStatusText');
+      if (!dot || !txt) return;
+      dot.className = 'ta-status-dot ' + (state === 'ok' ? 'connected' : state === 'error' ? 'error' : '');
+      txt.textContent = text;
+    }
+
+    // ============================================================
+    // JSONBIN API
+    // ============================================================
+    async function fetchAll() {
+      setStatus('connecting', 'Loading');
+      try {
+        const res = await fetch(JSONBIN_BASE + '/latest', {
+          headers: { 'X-Access-Key': JSONBIN_ACCESS_KEY }
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        cache = (data && data.record) ? data.record : { assessments: {} };
+        if (!cache.assessments) cache.assessments = {};
+        isOnline = true;
+        setStatus('ok', 'Connected');
+        return cache;
+      } catch (e) {
+        console.error('Load failed:', e);
+        isOnline = false;
+        setStatus('error', 'Offline');
+        return cache;
+      }
+    }
+
+    async function pushAll() {
+      // Always read latest before writing to reduce overwrite risk on concurrent edits
+      try {
+        setStatus('connecting', 'Saving');
+        // Get latest first
+        const latestRes = await fetch(JSONBIN_BASE + '/latest', {
+          headers: { 'X-Access-Key': JSONBIN_ACCESS_KEY }
+        });
+        if (latestRes.ok) {
+          const latestData = await latestRes.json();
+          const latest = (latestData && latestData.record) ? latestData.record : { assessments: {} };
+          if (!latest.assessments) latest.assessments = {};
+          // Merge latest with our local cache (our local writes win for keys we touched)
+          const merged = { assessments: Object.assign({}, latest.assessments, cache.assessments) };
+          cache = merged;
+        }
+        const res = await fetch(JSONBIN_BASE, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Access-Key': JSONBIN_ACCESS_KEY
+          },
+          body: JSON.stringify(cache)
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        isOnline = true;
+        setStatus('ok', 'Saved');
+        setTimeout(() => { if (isOnline) setStatus('ok', 'Connected'); }, 1500);
+        return true;
+      } catch (e) {
+        console.error('Save failed:', e);
+        isOnline = false;
+        setStatus('error', 'Save failed');
+        return false;
+      }
+    }
+
+    function queueSave() {
+      saveQueue = saveQueue.then(() => pushAll()).catch(() => {});
+      return saveQueue;
+    }
+
+    function assessmentKey(assessorId, trialistId) {
+      return assessorId + '__' + trialistId;
+    }
+
+    function defaultData() {
+      return { scores: {}, positions: [], comment: '', complete: false };
+    }
+
+    function getAssessment(assessorId, trialistId) {
+      const k = assessmentKey(assessorId, trialistId);
+      const a = cache.assessments[k];
+      if (!a) return defaultData();
+      if (!Array.isArray(a.positions)) a.positions = [];
+      if (!a.scores) a.scores = {};
+      return a;
+    }
+
+    function setAssessment(assessorId, trialistId, data) {
+      const k = assessmentKey(assessorId, trialistId);
+      cache.assessments[k] = data;
+    }
+
+    function getAllForTrialist(trialistId) {
+      const out = {};
+      ALL_ASSESSORS.forEach(a => {
+        const k = assessmentKey(a.id, trialistId);
+        if (cache.assessments[k]) out[a.id] = cache.assessments[k];
+      });
+      return out;
+    }
+
+    function getCompletionStatus(assessorId) {
+      const s = {};
+      TRIALISTS.forEach(t => {
+        const a = getAssessment(assessorId, t.id);
+        s[t.id] = !!a.complete;
+      });
+      return s;
+    }
+
+    function isFullAssessor(id) { return ASSESSORS_FULL.some(a => a.id === id); }
+    function getCategories(id) { return isFullAssessor(id) ? FULL_CATEGORIES : LIGHT_CATEGORIES; }
+
+    // ============================================================
+    // RENDER
+    // ============================================================
+    function escapeHtml(str) {
+      if (str == null) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    }
+
+    function renderHome() {
+      return `
+        <h1 class="ta-h1">Trial assessment</h1>
+        <p class="ta-sub">6 trialists, taking 2 to 3. Pick your role to start.</p>
+
+        <div class="ta-section">
+          <p class="ta-label">Full assessor</p>
+          <div class="ta-trialist-grid">
+            ${ASSESSORS_FULL.map(a => `<button class="ta-trialist-btn" onclick="taSelectAssessor('${a.id}')"><div class="name">${a.name}</div><div class="src">All criteria</div></button>`).join('')}
+          </div>
+        </div>
+
+        <div class="ta-section">
+          <p class="ta-label">Light assessor</p>
+          <div class="ta-trialist-grid">
+            ${ASSESSORS_LIGHT.map(a => `<button class="ta-trialist-btn" onclick="taSelectAssessor('${a.id}')"><div class="name">${a.name}</div><div class="src">Gut feel and social fit</div></button>`).join('')}
+          </div>
+        </div>
+
+        <div class="ta-section" style="margin-top: 32px; padding-top: 20px; border-top: 1px solid #000000;">
+          <p class="ta-label">After everyone is done</p>
+          <button class="ta-btn-primary" onclick="taShowSummary()">View aggregated summary</button>
+          <button class="ta-btn-secondary" onclick="taRefresh()" style="margin-left: 8px;">Refresh data</button>
+        </div>
+      `;
+    }
+
+    function renderTrialistSelect() {
+      const status = getCompletionStatus(state.assessor);
+      const a = ALL_ASSESSORS.find(x => x.id === state.assessor);
+      const completed = Object.values(status).filter(Boolean).length;
+      return `
+        <button class="ta-back" onclick="taGoHome()">back to assessor selection</button>
+        <h1 class="ta-h1">Hi ${a.name}</h1>
+        <p class="ta-sub">${isFullAssessor(state.assessor) ? 'Full assessment' : 'Light assessment'} - ${completed} of ${TRIALISTS.length} done</p>
+        <div class="ta-trialist-grid">
+          ${TRIALISTS.map(t => `
+            <button class="ta-trialist-btn ${status[t.id] ? 'done' : ''}" onclick="taSelectTrialist('${t.id}')">
+              <div class="name">${t.name}</div>
+              <div class="src">${t.source}</div>
+              ${status[t.id] ? '<div class="status">DONE - tap to edit</div>' : ''}
+            </button>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function renderScoring() {
+      const t = TRIALISTS.find(x => x.id === state.trialist);
+      const a = ALL_ASSESSORS.find(x => x.id === state.assessor);
+      const cats = getCategories(state.assessor);
+      const existing = getAssessment(state.assessor, state.trialist);
+
+      let html = `
+        <button class="ta-back" onclick="taBackToTrialists()">back to trialists</button>
+        <h1 class="ta-h1">${t.name}</h1>
+        <p class="ta-sub">${t.source} - assessing as ${a.name}</p>
+        <div class="ta-status-bar">Scale: 1 = poor, 6 = excellent. Scores save automatically to the cloud.</div>
+
+        <div class="ta-cat-header">Position(s) they can play</div>
+        <div class="ta-card">
+          <div class="ta-pos-grid">
+            ${POSITIONS.map(p => `
+              <button class="ta-pos-btn ${existing.positions.includes(p.id) ? 'selected' : ''}" onclick="taTogglePosition('${p.id}')">
+                <span class="pos-code">${p.code}</span>
+                <span class="pos-name">${p.name}</span>
+              </button>
+            `).join('')}
+          </div>
+          <p style="font-size:12px;color:#888;margin:10px 0 0">Pick all that apply.</p>
+        </div>
+      `;
+
+      cats.forEach(cat => {
+        html += `<div class="ta-cat-header">${cat.name}</div><div class="ta-card">`;
+        cat.criteria.forEach(crit => {
+          const key = `${cat.id}__${crit.id}`;
+          const cur = existing.scores[key];
+          html += `
+            <div class="ta-row">
+              <div class="ta-row-label">${crit.name}${crit.hint ? `<span class="ta-row-hint">${crit.hint}</span>` : ''}</div>
+              <div class="ta-scale">
+                ${[1,2,3,4,5,6].map(n => `<button class="${cur === n ? 'selected' : ''}" onclick="taScore('${key}', ${n})">${n}</button>`).join('')}
+              </div>
+            </div>
+          `;
+        });
+        html += `</div>`;
+      });
+
+      html += `
+        <div class="ta-section">
+          <label class="ta-label">Notes and comments</label>
+          <textarea class="ta-textarea" id="taComment" placeholder="Anything specific that stood out, good or bad..." oninput="taSaveCommentDebounced(this.value)">${escapeHtml(existing.comment)}</textarea>
+        </div>
+        <div class="ta-btn-row">
+          <button class="ta-btn-primary" onclick="taMarkComplete()">${existing.complete ? 'Update and back to trialists' : 'Mark complete and back'}</button>
+        </div>
+      `;
+      return html;
+    }
+
+    function aggregatePositions(allData) {
+      const counts = {};
+      POSITIONS.forEach(p => counts[p.id] = 0);
+      Object.values(allData).forEach(d => {
+        (d.positions || []).forEach(p => { if (counts[p] != null) counts[p]++; });
+      });
+      return counts;
+    }
+
+    function topPositions(counts) {
+      const max = Math.max(...Object.values(counts));
+      if (max === 0) return [];
+      return POSITIONS.filter(p => counts[p.id] === max).map(p => p.id);
+    }
+
+    function renderSummary() {
+      let html = `
+        <button class="ta-back" onclick="taGoHome()">back</button>
+        <h1 class="ta-h1">Aggregated summary</h1>
+        <p class="ta-sub">All assessors combined. Looking for 2 to 3 to take.</p>
+      `;
+
+      const summaryData = TRIALISTS.map(t => {
+        const all = getAllForTrialist(t.id);
+        const fulls = Object.entries(all).filter(([id]) => isFullAssessor(id));
+        const lights = Object.entries(all).filter(([id]) => !isFullAssessor(id));
+
+        const catAverages = {};
+        let weightedSum = 0, weightTotal = 0;
+
+        FULL_CATEGORIES.forEach(cat => {
+          const allScores = [];
+          fulls.forEach(([_, d]) => {
+            cat.criteria.forEach(crit => {
+              const key = `${cat.id}__${crit.id}`;
+              if (d.scores[key] != null) allScores.push(d.scores[key]);
+            });
+          });
+          if (allScores.length > 0) {
+            const avg = allScores.reduce((a,b)=>a+b,0) / allScores.length;
+            catAverages[cat.id] = avg;
+            const w = FULL_WEIGHTS[cat.id] || 1;
+            weightedSum += avg * w;
+            weightTotal += w;
+          }
+        });
+
+        const lightFitScores = [];
+        const lightGutScores = [];
+        lights.forEach(([_, d]) => {
+          LIGHT_CATEGORIES.forEach(cat => {
+            cat.criteria.forEach(crit => {
+              const key = `${cat.id}__${crit.id}`;
+              if (d.scores[key] != null) {
+                if (cat.id === 'gut') lightGutScores.push(d.scores[key]);
+                else lightFitScores.push(d.scores[key]);
+              }
+            });
+          });
+        });
+
+        return {
+          trialist: t,
+          catAverages,
+          weightedTotal: weightTotal > 0 ? weightedSum / weightTotal : null,
+          fullCount: fulls.length,
+          lightCount: lights.length,
+          lightFitAvg: lightFitScores.length > 0 ? lightFitScores.reduce((a,b)=>a+b,0)/lightFitScores.length : null,
+          lightGutAvg: lightGutScores.length > 0 ? lightGutScores.reduce((a,b)=>a+b,0)/lightGutScores.length : null,
+          positionCounts: aggregatePositions(all),
+          all
+        };
+      });
+
+      summaryData.sort((a,b) => (b.weightedTotal || 0) - (a.weightedTotal || 0));
+
+      const hasAnyData = summaryData.some(d => d.weightedTotal != null || d.lightFitAvg != null || Object.values(d.positionCounts).some(c => c > 0));
+      if (!hasAnyData) {
+        html += `<div class="ta-empty">No assessments saved yet. Go back and have assessors fill in their scores first.</div>`;
+        return html;
+      }
+
+      html += `
+        <div class="ta-card" style="overflow-x: auto;">
+          <table class="ta-summary-table">
+            <thead>
+              <tr><th>Trialist</th><th>Pos</th><th class="num">Off</th><th class="num">Def</th><th class="num">IQ x1.5</th><th class="num">Phys</th><th class="num">Fit x1.5</th><th class="num">Light fit</th><th class="num">Total</th></tr>
+            </thead>
+            <tbody>
+              ${summaryData.map(d => {
+                const top = topPositions(d.positionCounts);
+                const posDisplay = top.length > 0
+                  ? top.map(p => POSITIONS.find(x => x.id === p).code).join('/')
+                  : '-';
+                return `
+                  <tr>
+                    <td><strong>${d.trialist.name}</strong><br><span style="font-size:11px;color:#888">${d.fullCount}/3 full, ${d.lightCount}/3 light</span></td>
+                    <td><span class="ta-pos-tag">${posDisplay}</span></td>
+                    <td class="num">${d.catAverages.offense != null ? d.catAverages.offense.toFixed(1) : '-'}</td>
+                    <td class="num">${d.catAverages.defense != null ? d.catAverages.defense.toFixed(1) : '-'}</td>
+                    <td class="num">${d.catAverages.iq != null ? d.catAverages.iq.toFixed(1) : '-'}</td>
+                    <td class="num">${d.catAverages.physical != null ? d.catAverages.physical.toFixed(1) : '-'}</td>
+                    <td class="num">${d.catAverages.fit != null ? d.catAverages.fit.toFixed(1) : '-'}</td>
+                    <td class="num">${d.lightFitAvg != null ? d.lightFitAvg.toFixed(1) : '-'}</td>
+                    <td class="num"><strong>${d.weightedTotal != null ? d.weightedTotal.toFixed(2) : '-'}</strong></td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+        <p style="font-size:12px;color:#888;margin-top:8px">Pos = position(s) most assessors picked. Total = weighted average of full-assessor category scores. IQ and Fit weighted x1.5.</p>
+      `;
+
+      html += `<div style="font-size:18px;font-weight:600;margin:32px 0 12px">Detail per trialist</div>`;
+      summaryData.forEach((d, idx) => {
+        html += `
+          <div class="ta-card">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+              <div>
+                <span style="font-weight:600;font-size:17px">${idx + 1}. ${d.trialist.name}</span>
+                <span class="ta-pill ta-pill-secondary" style="margin-left:8px">${d.trialist.source}</span>
+              </div>
+              <span class="ta-pill ta-pill-info">Total ${d.weightedTotal != null ? d.weightedTotal.toFixed(2) : 'n/a'}</span>
+            </div>
+
+            <div style="margin-bottom:12px"><span style="font-size:12px;color:#555;margin-right:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px">Position votes:</span>
+              ${POSITIONS.map(p => {
+                const c = d.positionCounts[p.id];
+                if (c === 0) return '';
+                return `<span class="ta-pos-tag">${p.code} (${c})</span>`;
+              }).join('') || '<span style="font-size:12px;color:#888">none yet</span>'}
+            </div>
+        `;
+
+        const fullData = Object.entries(d.all).filter(([id]) => isFullAssessor(id));
+        if (fullData.length > 0) {
+          html += `<table class="ta-summary-table"><thead><tr><th>Criterion</th>`;
+          fullData.forEach(([id]) => {
+            const a = ALL_ASSESSORS.find(x => x.id === id);
+            html += `<th class="num">${a.name}</th>`;
+          });
+          html += `<th class="num">Avg</th></tr></thead><tbody>`;
+
+          FULL_CATEGORIES.forEach(cat => {
+            html += `<tr><td colspan="${fullData.length + 2}" style="background:#f0f0f0;font-weight:600;font-size:11px;padding:8px;text-transform:uppercase;letter-spacing:0.5px">${cat.name}</td></tr>`;
+            cat.criteria.forEach(crit => {
+              const key = `${cat.id}__${crit.id}`;
+              const scores = fullData.map(([_, d]) => d.scores[key]).filter(s => s != null);
+              const avg = scores.length > 0 ? scores.reduce((a,b)=>a+b,0)/scores.length : null;
+              html += `<tr><td>${crit.name}</td>`;
+              fullData.forEach(([_, d]) => {
+                html += `<td class="num">${d.scores[key] != null ? d.scores[key] : '-'}</td>`;
+              });
+              html += `<td class="num"><strong>${avg != null ? avg.toFixed(1) : '-'}</strong></td></tr>`;
+            });
+          });
+          html += `</tbody></table>`;
+        }
+
+        const lightData = Object.entries(d.all).filter(([id]) => !isFullAssessor(id));
+        if (lightData.length > 0) {
+          html += `<div style="margin-top:16px;padding-top:16px;border-top:1px solid #e0e0e0"><div style="font-size:12px;font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px">Light assessors</div>`;
+          html += `<table class="ta-summary-table"><thead><tr><th>Criterion</th>`;
+          lightData.forEach(([id]) => {
+            const a = ALL_ASSESSORS.find(x => x.id === id);
+            html += `<th class="num">${a.name}</th>`;
+          });
+          html += `</tr></thead><tbody>`;
+          LIGHT_CATEGORIES.forEach(cat => {
+            cat.criteria.forEach(crit => {
+              const key = `${cat.id}__${crit.id}`;
+              html += `<tr><td>${crit.name}</td>`;
+              lightData.forEach(([_, d]) => {
+                html += `<td class="num">${d.scores[key] != null ? d.scores[key] : '-'}</td>`;
+              });
+              html += `</tr>`;
+            });
+          });
+          html += `</tbody></table></div>`;
+        }
+
+        const allComments = Object.entries(d.all).filter(([_, data]) => data.comment && data.comment.trim());
+        if (allComments.length > 0) {
+          html += `<div style="margin-top:16px;padding-top:16px;border-top:1px solid #e0e0e0"><div style="font-size:12px;font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px">Comments</div>`;
+          allComments.forEach(([id, data]) => {
+            const a = ALL_ASSESSORS.find(x => x.id === id);
+            html += `<div class="ta-comments-block"><div class="who">${a.name}</div>${escapeHtml(data.comment)}</div>`;
+          });
+          html += `</div>`;
+        }
+        html += `</div>`;
+      });
+
+      html += `
+        <div class="ta-btn-row" style="margin-top:24px">
+          <button class="ta-btn-primary" onclick="taExportData()">Export all as text</button>
+          <button class="ta-btn-secondary" onclick="taRefresh()">Refresh data</button>
+        </div>
+        <div id="taExportArea"></div>
+      `;
+      return html;
+    }
+
+    // ============================================================
+    // ACTIONS
+    // ============================================================
+    let commentDebounceTimer = null;
+
+    window.taSelectAssessor = function(id) { state.assessor = id; state.view = 'trialist_select'; render(); };
+    window.taSelectTrialist = function(id) { state.trialist = id; state.view = 'scoring'; render(); };
+    window.taGoHome = function() { state.view = 'home'; state.assessor = null; state.trialist = null; render(); };
+    window.taBackToTrialists = function() { state.view = 'trialist_select'; state.trialist = null; render(); };
+
+    window.taScore = function(key, value) {
+      const e = getAssessment(state.assessor, state.trialist);
+      e.scores[key] = value;
+      const ta = document.getElementById('taComment');
+      if (ta) e.comment = ta.value;
+      setAssessment(state.assessor, state.trialist, e);
+      queueSave();
+      render();
+    };
+
+    window.taTogglePosition = function(posId) {
+      const e = getAssessment(state.assessor, state.trialist);
+      const idx = e.positions.indexOf(posId);
+      if (idx >= 0) e.positions.splice(idx, 1);
+      else e.positions.push(posId);
+      const ta = document.getElementById('taComment');
+      if (ta) e.comment = ta.value;
+      setAssessment(state.assessor, state.trialist, e);
+      queueSave();
+      render();
+    };
+
+    window.taSaveCommentDebounced = function(value) {
+      const e = getAssessment(state.assessor, state.trialist);
+      e.comment = value;
+      setAssessment(state.assessor, state.trialist, e);
+      clearTimeout(commentDebounceTimer);
+      commentDebounceTimer = setTimeout(() => { queueSave(); }, 800);
+    };
+
+    window.taMarkComplete = async function() {
+      const e = getAssessment(state.assessor, state.trialist);
+      e.complete = true;
+      const ta = document.getElementById('taComment');
+      if (ta) e.comment = ta.value;
+      setAssessment(state.assessor, state.trialist, e);
+      await queueSave();
+      state.view = 'trialist_select';
+      state.trialist = null;
+      render();
+    };
+
+    window.taShowSummary = async function() {
+      state.view = 'summary';
+      render();
+      await fetchAll();
+      render();
+    };
+
+    window.taRefresh = async function() {
+      await fetchAll();
+      render();
+    };
+
+    window.taExportData = function() {
+      let txt = `RATHMINES BC TRIAL ASSESSMENT\n${new Date().toLocaleDateString()}\n\n`;
+      TRIALISTS.forEach(t => {
+        txt += `\n=== ${t.name} (${t.source}) ===\n`;
+        const all = getAllForTrialist(t.id);
+        Object.entries(all).forEach(([aid, d]) => {
+          const a = ALL_ASSESSORS.find(x => x.id === aid);
+          txt += `\n-- ${a.name} (${isFullAssessor(aid) ? 'full' : 'light'}) --\n`;
+          if (d.positions && d.positions.length > 0) {
+            txt += `  Positions: ${d.positions.join(', ')}\n`;
+          }
+          const cats = isFullAssessor(aid) ? FULL_CATEGORIES : LIGHT_CATEGORIES;
+          cats.forEach(cat => {
+            cat.criteria.forEach(crit => {
+              const key = `${cat.id}__${crit.id}`;
+              if (d.scores[key] != null) txt += `  ${crit.name}: ${d.scores[key]}\n`;
+            });
+          });
+          if (d.comment) txt += `  Comment: ${d.comment}\n`;
+        });
+      });
+      const area = document.getElementById('taExportArea');
+      area.innerHTML = `<textarea class="ta-textarea" style="min-height:300px;margin-top:16px" readonly>${escapeHtml(txt)}</textarea>`;
+    };
+
+    function render() {
+      const el = document.getElementById('taContent');
+      if (!el) return;
+      if (state.view === 'home') el.innerHTML = renderHome();
+      else if (state.view === 'trialist_select') el.innerHTML = renderTrialistSelect();
+      else if (state.view === 'scoring') el.innerHTML = renderScoring();
+      else if (state.view === 'summary') el.innerHTML = renderSummary();
+    }
+
+    // ============================================================
+    // INIT
+    // ============================================================
+    (async function init() {
+      // Validate config
+      if (JSONBIN_BIN_ID === 'YOUR_BIN_ID_HERE' || JSONBIN_ACCESS_KEY === 'YOUR_ACCESS_KEY_HERE') {
+        document.getElementById('taContent').innerHTML = `
+          <div class="ta-error">
+            <strong>Configuration needed.</strong> Edit index.html and replace YOUR_BIN_ID_HERE and YOUR_ACCESS_KEY_HERE near the top of the script with your real JSONBin credentials, then refresh.
+          </div>
+        `;
+        return;
+      }
+      await fetchAll();
+      render();
+    })();
+
+    // Refresh when tab becomes visible again (catch updates from other assessors)
+    document.addEventListener('visibilitychange', async () => {
+      if (document.visibilityState === 'visible') {
+        await fetchAll();
+        render();
+      }
+    });
+  </script>
+</body>
+</html>
