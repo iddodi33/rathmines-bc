@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#000000">
+<title>Rathmines BC - Summer Skills Sign Up</title>
+<style>
+  /* ===================================================================
+     CONFIG lives in the script tag at the bottom of this file.
+     Create a jsonbin.io bin with starting content {"responses": {}},
+     then paste your Bin ID and Master Key into the two lines marked CONFIG.
+     =================================================================== */
+  :root{
+    --black:#000000;
+    --ink:#0a0a0a;
+    --muted:#6b6b6b;
+    --line:#d6d6d6;
+    --paper:#ffffff;
+    --soft:#f3f3f1;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--paper);color:var(--ink);line-height:1.5;padding-bottom:64px;
+  }
+
+  /* ---- header ---- */
+  .topbar{background:var(--black);width:100%;}
+  .bar-inner{max-width:920px;margin:0 auto;display:flex;align-items:center;gap:16px;padding:18px 22px;}
+  .crest{width:46px;height:auto;flex:none;display:block;}
+  .brand-text{flex:1;min-width:0;}
+  .club{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#9a9a9a;font-weight:600;}
+  .page{font-size:20px;font-weight:700;color:#fff;line-height:1.1;margin-top:2px;}
+  .status{display:flex;align-items:center;gap:8px;flex:none;font-size:13px;color:#bdbdbd;font-weight:500;}
+  .dot{width:9px;height:9px;border-radius:50%;background:#5a5a5a;flex:none;}
+  .status.ok .dot{background:#cfcfcf;}
+  .status.bad .dot{background:#5a5a5a;}
+
+  /* ---- layout ---- */
+  .container{max-width:720px;margin:0 auto;padding:0 22px;}
+  h1{font-size:30px;font-weight:800;letter-spacing:-.01em;margin:30px 0 6px;}
+  .sub{color:var(--muted);font-size:15px;margin-bottom:6px;}
+  .label{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:26px 0 12px;}
+  hr.div{border:none;border-top:1px solid var(--line);margin:34px 0 0;}
+
+  .banner{background:var(--soft);border:1px solid var(--line);color:#444;border-radius:8px;padding:13px 15px;font-size:14px;margin-top:18px;}
+
+  /* ---- name picker ---- */
+  .names{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;}
+  .name-btn{font:inherit;font-size:15px;font-weight:600;text-align:left;padding:14px 15px;border-radius:10px;border:1.5px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer;transition:.12s;}
+  .name-btn:hover{border-color:#9a9a9a;}
+  .name-btn:active{transform:scale(.985);}
+  .name-btn.sel{background:var(--ink);border-color:var(--ink);color:#fff;}
+
+  /* ---- ball switch ---- */
+  .ball-row{display:flex;align-items:center;justify-content:space-between;gap:14px;border:1.5px solid var(--line);border-radius:10px;padding:15px 17px;}
+  .ball-row .lbl{font-weight:700;font-size:15px;}
+  .ball-row .lbl span{display:block;font-weight:400;color:var(--muted);font-size:13px;margin-top:1px;}
+  .switch{position:relative;width:58px;height:32px;flex:none;border:none;border-radius:20px;background:#d6d6d6;cursor:pointer;transition:.18s;}
+  .switch.on{background:var(--ink);}
+  .switch::after{content:"";position:absolute;top:3px;left:3px;width:26px;height:26px;border-radius:50%;background:#fff;transition:.18s;box-shadow:0 1px 2px rgba(0,0,0,.25);}
+  .switch.on::after{transform:translateX(26px);}
+
+  /* ---- session cards ---- */
+  .card{border:1.5px solid var(--line);border-radius:10px;padding:16px;margin-bottom:10px;}
+  .card .date{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);}
+  .card .title{font-size:17px;font-weight:700;line-height:1.18;margin:3px 0 4px;}
+  .card .desc{font-size:14px;color:var(--muted);margin-bottom:13px;}
+  .seg{display:flex;gap:5px;background:var(--soft);padding:4px;border-radius:9px;}
+  .seg button{flex:1;border:none;background:transparent;font:inherit;font-weight:700;font-size:14px;color:var(--muted);padding:10px;border-radius:6px;cursor:pointer;transition:.12s;}
+  .seg button.active-out{background:#fff;color:var(--ink);border:1px solid var(--line);}
+  .seg button.active-in{background:var(--ink);color:#fff;}
+
+  .break-card{background:var(--soft);border:1px dashed #c4c4c4;border-radius:10px;padding:13px 16px;margin-bottom:10px;text-align:center;color:var(--muted);font-size:14px;}
+  .break-card b{color:#555;font-weight:700;}
+
+  /* ---- buttons ---- */
+  .btn{font:inherit;font-weight:700;font-size:16px;border-radius:8px;cursor:pointer;padding:15px 24px;transition:.12s;}
+  .btn:active{transform:scale(.99);}
+  .btn-primary{background:var(--ink);color:#fff;border:1.5px solid var(--ink);}
+  .btn-primary:disabled{opacity:.45;cursor:default;}
+  .btn-secondary{background:#fff;color:var(--ink);border:1.5px solid #bfbfbf;}
+  .btn-full{width:100%;margin-top:14px;}
+  .btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;}
+
+  .hidden{display:none;}
+  .hint{color:var(--muted);font-size:14px;padding:24px 0;}
+
+  /* ---- coach ---- */
+  .coach-card{border:1.5px solid var(--line);border-radius:10px;padding:16px;margin-bottom:10px;}
+  .coach-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
+  .coach-date{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);}
+  .coach-title{font-size:16px;font-weight:700;line-height:1.18;margin-top:2px;}
+  .counts{display:flex;gap:7px;flex:none;}
+  .pill{font-size:12px;font-weight:700;padding:5px 11px;border-radius:20px;white-space:nowrap;border:1.5px solid var(--line);}
+  .pill.head{background:var(--ink);color:#fff;border-color:var(--ink);}
+  .att{margin-top:12px;font-size:14px;}
+  .att .none{color:var(--muted);font-style:italic;}
+  .att .has::after{content:" \u25CF";color:var(--ink);font-size:9px;vertical-align:middle;}
+
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;font-weight:600;font-size:15px;padding:13px 22px;border-radius:30px;opacity:0;transition:.25s;pointer-events:none;z-index:50;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .foot{color:var(--muted);font-size:12px;margin-top:26px;}
+
+  @media(max-width:430px){
+    .page{font-size:18px;} .status span.txt{display:none;}
+    h1{font-size:26px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="bar-inner">
+    <img class="crest" alt="Rathmines BC crest" src="logo.png" onerror="this.onerror=null;this.src='data:image/png;base64,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'">
+    <div class="brand-text">
+      <div class="club">Rathmines Basketball Club</div>
+      <div class="page">Summer Skills</div>
+    </div>
+    <div class="status bad" id="status"><span class="dot"></span><span class="txt" id="statusText">Connecting</span></div>
+  </div>
+</div>
+
+<main class="container">
+
+  <!-- ===== SIGN UP ===== -->
+  <div id="signupView">
+    <h1>Summer skills sessions</h1>
+    <p class="sub">Mondays through June and July. Tap your name, mark the sessions you are coming to, and let me know if you can bring a ball.</p>
+
+    <div id="setupBanner" class="banner hidden">Setup needed. Open this file and add your JSONBin Bin ID and Master Key in the CONFIG lines near the bottom.</div>
+
+    <div class="label">1. Who are you?</div>
+    <div class="names" id="names"></div>
+
+    <div id="form" class="hidden">
+      <div class="label">2. Can you bring a ball?</div>
+      <div class="ball-row">
+        <div class="lbl">I can bring a ball<span>You will bring it to each session you attend</span></div>
+        <button class="switch" id="ballSwitch" aria-label="Bring a ball"></button>
+      </div>
+
+      <div class="label">3. Which sessions are you coming to?</div>
+      <div id="sessions"></div>
+
+      <button class="btn btn-primary btn-full" id="saveBtn">Save my sign up</button>
+    </div>
+
+    <div id="pickHint" class="hint">Pick your name above to get started.</div>
+
+    <hr class="div">
+    <div class="label">Coach</div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="viewCoach">View who is coming</button>
+      <button class="btn btn-secondary" id="refresh1">Refresh data</button>
+    </div>
+  </div>
+
+  <!-- ===== COACH ===== -->
+  <div id="coachView" class="hidden">
+    <h1>Who is coming</h1>
+    <p class="sub">Live sign ups per session. The black pill is the headcount, the outlined pill is how many balls. A dot next to a name means that player can bring one.</p>
+    <div id="coachBody"></div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" id="backBtn">Back to sign up</button>
+      <button class="btn btn-secondary" id="refresh2">Refresh data</button>
+    </div>
+  </div>
+
+  <div class="foot">Rathmines Basketball Club</div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===================================================================
+   CONFIG - edit these two lines only.
+   =================================================================== */
+const BIN_ID     = "YOUR_BIN_ID";
+const MASTER_KEY = "YOUR_MASTER_KEY";
+/* =================================================================== */
+
+const ROSTER = [
+  "Aaron","Adam Halpin","Ante","Barry","Bryan","Ciar\u00e1n","CJ",
+  "Dan Lizano","Dan Logan","David","Erkin","Fergal","Gabriel","Igor",
+  "Jack","John","Kieran","Lee","Leon F","Mateus","Mylo","Omar",
+  "Phil E.","Phil H.","Robbie","Sean","Vincent"
+];
+
+const SESSIONS = [
+  {id:"s1", date:"Mon 15 June", title:"Attacking the closeout and first-step drives", desc:"Beating your man off the catch: jump step, rip-through, palm fake."},
+  {id:"s2", date:"Mon 22 June", title:"On-ball defense, 1v1 containment and closeouts", desc:"Closing out under control, staying in front, contesting without fouling."},
+  {id:"s3", date:"Mon 29 June", title:"Weak-hand development", desc:"Dribbling, protecting and finishing with the off hand, both ways."},
+  {id:"BREAK", date:"Mon 6 July", title:"No session, one week break", brk:true},
+  {id:"s4", date:"Mon 13 July", title:"Change-of-direction finishes", desc:"Getting through the paint: hop step and pro hop."},
+  {id:"s5", date:"Mon 20 July", title:"Shooting against a stacked paint", desc:"Scoring over a packed paint: half-step floaters and short pull-ups."},
+  {id:"s6", date:"Mon 27 July", title:"Cutting and backdoors", desc:"Getting open off the ball, reading the defender, timing the cut."}
+];
+const PLAYABLE = SESSIONS.filter(s => !s.brk);
+
+const API = "https://api.jsonbin.io/v3/b/" + BIN_ID;
+const configured = BIN_ID !== "YOUR_BIN_ID" && MASTER_KEY !== "YOUR_MASTER_KEY";
+
+let responses = {};
+let current = null;
+let draft = { ball:false, sessions:{} };
+
+function setStatus(state){
+  const el = document.getElementById("status");
+  const t  = document.getElementById("statusText");
+  el.classList.remove("ok","bad");
+  if(state==="connected"){ el.classList.add("ok"); t.textContent="Connected"; }
+  else if(state==="setup"){ el.classList.add("bad"); t.textContent="Setup needed"; }
+  else if(state==="offline"){ el.classList.add("bad"); t.textContent="Offline"; }
+  else { el.classList.add("bad"); t.textContent="Connecting"; }
+}
+
+async function loadAll(){
+  if(!configured){ setStatus("setup"); return {}; }
+  try{
+    const res = await fetch(API + "/latest", { headers:{ "X-Master-Key":MASTER_KEY, "X-Bin-Meta":"false" }});
+    if(!res.ok) throw new Error(res.status);
+    const json = await res.json();
+    const data = (json && json.record !== undefined) ? json.record : json;
+    setStatus("connected");
+    return (data && data.responses) ? data.responses : {};
+  }catch(e){ console.error(e); setStatus("offline"); toast("Could not load. Check connection."); return responses; }
+}
+
+async function saveAll(obj){
+  const res = await fetch(API, {
+    method:"PUT",
+    headers:{ "Content-Type":"application/json", "X-Master-Key":MASTER_KEY },
+    body: JSON.stringify({ responses: obj })
+  });
+  if(!res.ok) throw new Error("save " + res.status);
+}
+
+function renderNames(){
+  const wrap = document.getElementById("names");
+  wrap.innerHTML = "";
+  ROSTER.forEach(name => {
+    const b = document.createElement("button");
+    b.className = "name-btn" + (name===current ? " sel" : "");
+    b.textContent = name;
+    b.onclick = () => selectPlayer(name);
+    wrap.appendChild(b);
+  });
+}
+
+function selectPlayer(name){
+  current = name;
+  const ex = responses[name] || { ball:false, sessions:{} };
+  draft = { ball: !!ex.ball, sessions: { ...(ex.sessions||{}) } };
+  renderNames();
+  document.getElementById("pickHint").classList.add("hidden");
+  document.getElementById("form").classList.remove("hidden");
+  renderBall(); renderSessions();
+  document.getElementById("form").scrollIntoView({behavior:"smooth", block:"start"});
+}
+
+function renderBall(){ document.getElementById("ballSwitch").className = "switch" + (draft.ball ? " on":""); }
+
+function renderSessions(){
+  const wrap = document.getElementById("sessions");
+  wrap.innerHTML = "";
+  SESSIONS.forEach(s => {
+    if(s.brk){
+      const d = document.createElement("div");
+      d.className = "break-card";
+      d.innerHTML = "<b>" + s.date + "</b> &middot; " + s.title;
+      wrap.appendChild(d); return;
+    }
+    const coming = !!draft.sessions[s.id];
+    const c = document.createElement("div");
+    c.className = "card";
+    c.innerHTML =
+      '<div class="date">'+s.date+'</div>'+
+      '<div class="title">'+s.title+'</div>'+
+      '<div class="desc">'+s.desc+'</div>'+
+      '<div class="seg">'+
+        '<button data-v="out" class="'+(!coming?'active-out':'')+'">Not coming</button>'+
+        '<button data-v="in" class="'+(coming?'active-in':'')+'">Coming</button>'+
+      '</div>';
+    const btns = c.querySelectorAll(".seg button");
+    btns[0].onclick = () => { draft.sessions[s.id]=false; renderSessions(); };
+    btns[1].onclick = () => { draft.sessions[s.id]=true; renderSessions(); };
+    wrap.appendChild(c);
+  });
+}
+
+document.getElementById("ballSwitch").onclick = () => { draft.ball=!draft.ball; renderBall(); };
+
+document.getElementById("saveBtn").onclick = async () => {
+  if(!current) return;
+  if(!configured){ toast("Add your JSONBin details first."); return; }
+  const btn = document.getElementById("saveBtn");
+  btn.disabled=true; btn.textContent="Saving...";
+  try{
+    const latest = await loadAll();
+    latest[current] = { ball:draft.ball, sessions:draft.sessions };
+    await saveAll(latest);
+    responses = latest;
+    toast("Saved, thanks " + current.split(" ")[0]);
+  }catch(e){ console.error(e); toast("Save failed, try again."); }
+  btn.disabled=false; btn.textContent="Save my sign up";
+};
+
+function renderCoach(){
+  const body = document.getElementById("coachBody");
+  body.innerHTML = "";
+  PLAYABLE.forEach(s => {
+    const att = ROSTER.filter(n => responses[n] && responses[n].sessions && responses[n].sessions[s.id]);
+    const balls = att.filter(n => responses[n].ball);
+    const list = att.length
+      ? att.map(n => '<span class="'+(responses[n].ball?'has':'')+'">'+n+'</span>').join(", ")
+      : '<span class="none">No sign ups yet</span>';
+    const card = document.createElement("div");
+    card.className = "coach-card";
+    card.innerHTML =
+      '<div class="coach-head"><div>'+
+        '<div class="coach-date">'+s.date+'</div>'+
+        '<div class="coach-title">'+s.title+'</div></div>'+
+        '<div class="counts"><span class="pill head">'+att.length+' in</span>'+
+        '<span class="pill">'+balls.length+' balls</span></div></div>'+
+      '<div class="att">'+list+'</div>';
+    body.appendChild(card);
+  });
+}
+
+function show(view){
+  const su = view==="signup";
+  document.getElementById("signupView").classList.toggle("hidden", !su);
+  document.getElementById("coachView").classList.toggle("hidden", su);
+  window.scrollTo({top:0});
+}
+
+document.getElementById("viewCoach").onclick = async () => { responses = await loadAll(); renderCoach(); show("coach"); };
+document.getElementById("backBtn").onclick = () => show("signup");
+document.getElementById("refresh1").onclick = async () => { responses = await loadAll(); toast("Refreshed"); };
+document.getElementById("refresh2").onclick = async () => { responses = await loadAll(); renderCoach(); toast("Refreshed"); };
+
+let toastTimer;
+function toast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.classList.add("show");
+  clearTimeout(toastTimer); toastTimer = setTimeout(()=>t.classList.remove("show"), 2200);
+}
+
+(async function init(){
+  if(!configured) document.getElementById("setupBanner").classList.remove("hidden");
+  setStatus(configured ? "connecting" : "setup");
+  renderNames();
+  responses = await loadAll();
+})();
+</script>
+</body>
+</html>
